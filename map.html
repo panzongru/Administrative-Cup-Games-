@@ -2,177 +2,16 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>115行政盃｜台中地圖</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>
-:root{--ink:#252a31;--muted:#707780;--paper:#fff;--bg:#eef0f3;--line:#e4e6e9}
-*{box-sizing:border-box}html,body{height:100%;margin:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
-#map{position:fixed;inset:0}
-.top{position:fixed;z-index:1000;left:20px;top:18px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border:1px solid #fff;border-radius:18px;padding:15px 18px;box-shadow:0 8px 30px #1d26301c}
-.kicker{font-size:11px;letter-spacing:.16em;color:#8a6b3d;font-weight:800}.title{font-size:21px;font-weight:850;margin-top:3px}.desc{font-size:12px;color:var(--muted);margin-top:3px}
-.card{position:fixed;z-index:1000;right:18px;top:18px;width:350px;max-height:calc(100vh - 36px);background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-radius:20px;box-shadow:0 12px 40px #1d26301e;overflow:hidden;border:1px solid #fff}
-.head{padding:13px 16px;border-bottom:1px solid var(--line)}.headrow{display:flex;justify-content:space-between;align-items:center}.head h2{font-size:16px;margin:0}.reset{border:0;background:#f1f2f4;border-radius:9px;padding:7px 10px;font-size:12px;cursor:pointer}
-.list{display:flex;flex-direction:column;overflow-y:auto;gap:5px;padding:8px 12px;height:calc(100vh - 120px);scrollbar-width:thin}
-.item{display:flex;gap:10px;align-items:center;padding:8px 9px;border:1px solid #eef0f2;border-radius:13px;background:#fff;cursor:pointer;box-shadow:0 2px 7px #1d263008}
-.item:hover{background:#f7f8f9}.item>div{min-width:0;flex:1}.item b{font-size:13px;line-height:1.2;display:block}.item small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.35}.num{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#fff;font-size:17px;font-weight:800;flex:none}
-.tip{position:fixed;z-index:999;left:20px;bottom:20px;background:rgba(37,42,49,.92);color:#fff;border-radius:12px;padding:9px 13px;font-size:12px;box-shadow:0 5px 20px #0002}
-@media(max-width:800px){
-  #map{height:calc(100vh - 116px);bottom:116px}
-  .top{left:10px;right:10px;top:10px;padding:10px 13px;border-radius:15px}
-  .title{font-size:18px}.desc{font-size:11px}
-  .card{left:0;right:0;bottom:0;top:auto;width:100%;height:116px;max-height:none;border-radius:18px 18px 0 0;border:0;border-top:1px solid #fff;box-shadow:0 -6px 25px #1d263018}
-  .head{padding:7px 10px 5px}
-  .head h2{font-size:13px}.reset{padding:5px 8px;font-size:11px}
-  .list{height:76px;padding:5px 10px 8px;display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
-  .item{flex:0 0 230px;height:66px;min-width:230px;padding:7px 8px;scroll-snap-align:start}
-  .item b{font-size:12px}.item small{font-size:10px}
-  .tip{display:none}
-}
-
-.locate-btn{border:0;background:#252a31;color:#fff;border-radius:9px;padding:7px 10px;font-size:11px;cursor:pointer}
-.nav-btn{display:inline-block;margin-top:6px;padding:6px 9px;background:#252a31;color:#fff!important;border-radius:8px;text-decoration:none;font-size:11px}
-.user-dot{width:18px;height:18px;border-radius:50%;background:#2878ff;border:3px solid #fff;box-shadow:0 2px 8px #0005}
-.user-pulse{width:28px;height:28px;border-radius:50%;background:#2878ff33;border:1px solid #2878ff66}
-@media(max-width:800px){.locate-btn{padding:6px 8px;font-size:10px}}
-
-</head>
-<body>
-<div id="map"></div>
-<div class="top"><div class="kicker">115 行政盃 · TAICHUNG</div><div class="title">比賽・住宿・晚餐地圖</div><div class="desc">左右滑動選擇地點</div></div>
-
-<div class="card">
-  <div class="head"><div class="headrow"><h2>📍 行程地點</h2><div><button class="locate-btn" onclick="locateMe()">📍 我的位置</button> <button class="reset" onclick="resetSelection()">全圖</button></div></div></div>
-  <div id="list" class="list"></div>
-</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-const places=[{id:"hotel",cat:"住宿",icon:"🏨",name:"塔木德酒店Choice 台中一中館",sub:"🏨 太平路22號｜一中商圈",lat:24.147801,lng:120.68534,color:"#b27a2f"},
-{id:"ntus",cat:"比賽",icon:"🏓",name:"國立臺灣體育運動大學",sub:"🏓 桌球｜雙十路一段16號",lat:24.14870915,lng:120.6876707,color:"#7156a8"},
-{id:"sports",cat:"比賽",icon:"🏸",name:"臺中市北區國民運動中心",sub:"🏸🏀 羽球、籃球｜崇德路一段55號",lat:24.1570556,lng:120.6841111,color:"#23836d"},
-{id:"yizhong",cat:"景點",icon:"🛍️",name:"一中街",sub:"🛍️ 一中商圈",lat:24.15025,lng:120.68565,color:"#555b63"},
-{id:"lion",cat:"餐飲",icon:"🍺",name:"獅兄弟酒館",sub:"🍺 9/10（四）17:30 晚餐｜柳川西路二段150號",lat:24.14645,lng:120.67265,color:"#b45757"},
-{id:"steak",cat:"餐飲",icon:"🥩",name:"烘牛炭燒大牛排",sub:"🥩 9/11（五）17:30 晚餐｜中華路一段41號",lat:24.14385,lng:120.67515,color:"#a45f35"},
-{id:"haoyun",cat:"活動",icon:"🎉",name:"好運來洲際宴展中心",sub:"🎉 9/12（六）開幕典禮暨選手之夜｜崇德路三段833號",lat:24.199694,lng:120.683999,color:"#3475a8"}];
-
-const map=L.map("map",{zoomControl:false}).setView([24.161,120.681],13);
-L.control.zoom({position:"bottomright"}).addTo(map);
-L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:20,attribution:"© OpenStreetMap © CARTO"}).addTo(map);
-
-const markers={}; let userMarker=null, userAccuracy=null, userLatLng=null;
-
-places.forEach(p=>{
- const icon=L.divIcon({className:"",html:`<div style="width:34px;height:34px;border-radius:12px;background:${p.color};border:3px solid white;box-shadow:0 4px 12px #0004;display:grid;place-items:center;color:white;font-weight:850;font-size:12px">${p.icon}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
- const g=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name+" 台中 "+p.lat+","+p.lng)}`;
- const m=L.marker([p.lat,p.lng],{icon}).addTo(map).bindPopup(`<b>${p.name}</b><br><span style="color:#777;font-size:12px">${p.sub}</span><br><a class="nav-btn" href="${g}" target="_blank" rel="noopener">📍 Google Maps 導航</a>`);
- m.on("click",()=>focusPlace(p.id));
- markers[p.id]=m;
-});
-
-function render(){
- const list=document.getElementById("list");
- list.innerHTML=places.map(p=>{
-  const g=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
-  return `<div class="item" onclick="focusPlace('${p.id}')"><span class="num" style="background:${p.color}">${p.icon}</span><div><b>${p.name}</b><small>${p.sub}</small></div><a href="${g}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="用 Google Maps 導航" style="width:30px;height:30px;flex:none;display:grid;place-items:center;background:#f1f2f4;border-radius:9px;text-decoration:none;font-size:15px">🧭</a></div>`;
- }).join("");
-}
-
-function focusPlace(id){
- const p=places.find(x=>x.id===id); if(!p)return;
- map.setView([p.lat,p.lng],15,{animate:true});
- markers[id].openPopup();
-}
-
-function locateMe(){
- if(!navigator.geolocation){ alert("此手機瀏覽器不支援定位功能。"); return; }
- navigator.geolocation.getCurrentPosition(pos=>{
-   const lat=pos.coords.latitude, lng=pos.coords.longitude;
-   userLatLng=L.latLng(lat,lng);
-   if(userMarker) map.removeLayer(userMarker);
-   if(userAccuracy) map.removeLayer(userAccuracy);
-   const userIcon=L.divIcon({className:"",html:'<div class="user-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]});
-   userMarker=L.marker([lat,lng],{icon:userIcon,zIndexOffset:1000}).addTo(map).bindPopup("<b>📍 我的目前位置</b>");
-   userAccuracy=L.circle([lat,lng],{radius:Math.min(pos.coords.accuracy||30,150),color:"#2878ff",weight:1,fillOpacity:.08}).addTo(map);
-   map.setView([lat,lng],15,{animate:true});
-   userMarker.openPopup();
- }, err=>{
-   let msg="無法取得目前位置。";
-   if(err.code===1) msg="請允許瀏覽器使用您的位置，才能定位。";
-   if(err.code===2) msg="目前無法取得 GPS 位置，請稍後再試。";
-   if(err.code===3) msg="定位逾時，請再試一次。";
-   alert(msg);
- }, {enableHighAccuracy:true,timeout:10000,maximumAge:30000});
-}
-
-function resetSelection(){
- map.setView([24.161,120.681],13,{animate:true});
- map.closePopup();
-}
-render();
-</script>
-</body>
-</html>
-taichung_transport_map_location.html
-HTML
-為什麼是空白的 另外還是要有按鈕可以點回賽程 分頁
-
-你看到空白，是因為上一版 HTML 少了一個 </style>，結果整個 <body> 都被瀏覽器當成 CSS，所以地圖完全沒有渲染出來 😅
-
-這次我修好了，而且也把你要的 分頁按鈕 加回來：
-
-🏆 賽程 → index.html
-
-🗺️ 台中地圖 → map.html
-
-手機版右上角也會顯示兩個按鈕
-
-保留 📍 我的位置
-
-下方左右滑動行程地點
-
-Google Maps 導航按鈕保留
-
-不再有網站內建行車路線
-
-修正版地圖 HTML
-
-已修正空白問題與分頁按鈕
-
-你放到 GitHub Pages 時，只要把這個檔案命名成 map.html，就可以和原本的 index.html 賽程頁互相切換。
-
-還是電腦版不能看
-
-對，這次我直接把地圖 HTML 重新整理成一個乾淨、獨立的版本，避免前面幾版互相覆蓋造成電腦版空白。
-
-這版包含：
-
-🖥️ 電腦版可以正常顯示地圖
-📱 手機版：地點清單在最下方左右滑動
-📍「我的位置」GPS 定位
-🧭 Google Maps 導航
-❌ 沒有網站內的行車路線
-🏆 賽程／🗺️ 台中地圖 分頁按鈕
-地圖地點標記全部保留
-
-下載修正版地圖 HTML
-
-這次如果放到 GitHub Pages，請把檔名改成 map.html，並和你的 index.html 放在同一層。 
-
-<!doctype html>
-<html lang="zh-Hant">
-<head>
-<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>115年全國原住民族行政盃｜台中地圖</title>
+<title>115年行政盃｜台中地圖</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;background:#eef0f3;color:#252a31}
 #map{position:fixed;inset:0;width:100%;height:100%;z-index:1}
-.page-tabs{position:fixed;z-index:3000;top:14px;right:16px;display:flex;gap:5px;padding:5px;background:rgba(255,255,255,.94);border-radius:12px;box-shadow:0 5px 18px rgba(20,30,40,.14)}
+.page-tabs{position:fixed;z-index:3000;top:18px;left:18px;display:flex;gap:5px;padding:5px;background:rgba(255,255,255,.94);border-radius:12px;box-shadow:0 5px 18px rgba(20,30,40,.14)}
 .page-tabs a{text-decoration:none;color:#59616a;font-size:13px;font-weight:800;padding:8px 12px;border-radius:8px}
-.page-tabs a.active{background:#252a31;color:#fff}
+.page-tabs a.active{background:#252a31;color:#fff}.page-tabs{box-shadow:0 4px 14px rgba(20,30,40,.18)}
 .top{position:fixed;z-index:2000;left:18px;top:18px;background:rgba(255,255,255,.95);padding:13px 16px;border-radius:16px;box-shadow:0 7px 25px rgba(20,30,40,.12);max-width:390px}
 .kicker{font-size:10px;letter-spacing:.16em;color:#8a6b3d;font-weight:800}
 .title{font-size:20px;font-weight:850;margin-top:3px}
@@ -196,7 +35,7 @@ html,body{margin:0;width:100%;height:100%;font-family:-apple-system,BlinkMacSyst
  #map{height:calc(100% - 116px);bottom:116px}
  .page-tabs{top:8px;right:8px}
  .page-tabs a{padding:7px 10px;font-size:12px}
- .top{left:9px;right:9px;top:50px;max-width:none;padding:9px 12px}
+ .top{left:9px;right:9px;top:10px;max-width:none;padding:9px 12px}
  .title{font-size:17px}
  .desc{font-size:11px}
  .card{left:0;right:0;top:auto;bottom:0;width:100%;height:116px;max-height:none;border-radius:18px 18px 0 0}
@@ -211,7 +50,7 @@ html,body{margin:0;width:100%;height:100%;font-family:-apple-system,BlinkMacSyst
 <body>
 <nav class="page-tabs"><a href="index.html">🏆 賽程</a><a href="map.html" class="active">🗺️ 台中地圖</a></nav>
 <div id="map"></div>
-<div class="top"><div class="kicker">ADMINISTRATIVE CUP</div><div class="title">台中行程地圖</div><div class="desc">📍 定位自己・選擇行程地點・可用 Google Maps 導航</div></div>
+<div class="top"><div class="kicker">ADMINISTRATIVE CUP</div><div class="title">行政盃｜台中行程地圖</div><div class="desc">📍 定位自己・選擇行程地點・可用 Google Maps 導航</div></div>
 <div class="card">
  <div class="head"><div class="headrow"><h2>📍 行程地點</h2><div><button class="locate-btn" onclick="locateMe()">📍 我的位置</button><button class="reset" onclick="resetMap()">全圖</button></div></div></div>
  <div id="list" class="list"></div>
@@ -233,15 +72,25 @@ places.forEach(p=>{
  const icon=L.divIcon({className:'',html:`<div style="width:34px;height:34px;border-radius:12px;background:${p.color};border:3px solid white;box-shadow:0 4px 12px #0004;display:grid;place-items:center;font-size:16px">${p.icon}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
  const nav=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
  const m=L.marker([p.lat,p.lng],{icon}).addTo(map).bindPopup(`<b>${p.name}</b><br><span style="font-size:12px;color:#777">${p.sub}</span><br><a href="${nav}" target="_blank" rel="noopener" style="display:inline-block;margin-top:7px;padding:6px 9px;background:#252a31;color:#fff;text-decoration:none;border-radius:8px;font-size:11px">🧭 Google Maps 導航</a>`);
- markers[p.id]=m;
+ m.on('click',()=>focusPlace(p.id)); markers[p.id]=m;
 });
 function render(){
  document.getElementById('list').innerHTML=places.map(p=>{
   const nav=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
-  return `<div class="item" onclick="focusPlace('${p.id}')"><span class="num" style="background:${p.color}">${p.icon}</span><div><b>${p.name}</b><small>${p.sub}</small></div><a class="nav" href="${nav}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🧭</a></div>`;
+  return `<div class="item" data-place-id="${p.id}" onclick="focusPlace('${p.id}')"><span class="num" style="background:${p.color}">${p.icon}</span><div><b>${p.name}</b><small>${p.sub}</small></div><a class="nav" href="${nav}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🧭</a></div>`;
  }).join('');
 }
-function focusPlace(id){const p=places.find(x=>x.id===id);if(!p)return;map.setView([p.lat,p.lng],15,{animate:true});markers[id].openPopup();}
+function scrollToPlace(id){
+ const el=document.querySelector('.item[data-place-id="'+id+'"]');
+ if(el) el.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+}
+
+function focusPlace(id){
+ const p=places.find(x=>x.id===id);if(!p)return;
+ map.setView([p.lat,p.lng],15,{animate:true});
+ markers[id].openPopup();
+ scrollToPlace(id);
+}
 function locateMe(){
  if(!navigator.geolocation){alert('此瀏覽器不支援定位功能。');return;}
  navigator.geolocation.getCurrentPosition(pos=>{
@@ -259,5 +108,3 @@ render();
 setTimeout(()=>map.invalidateSize(),300);
 </script>
 </body></html>
-taichung_transport_map_location_fixed.html
-HTML
