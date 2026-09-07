@@ -76,7 +76,7 @@ footer{text-align:center;color:#9aa1a8;font-size:12px;padding:0 20px 35px}
 <main class="container">
   <section class="toolbar">
     <input id="search" placeholder="🔎 搜尋隊伍、選手、場次…" />
-    <select id="sport"><option value="">全部球類</option></select>
+    <select id="sport"><option value="">全部球類</option><option value="桌球">桌球</option><option value="羽球籃球">羽球＋籃球</option></select>
     <select id="event"><option value="">全部項目／組別</option></select>
   </section>
   <div class="tabs" id="dateTabs"></div>
@@ -102,7 +102,7 @@ let activeDate = dates[0] || "";
 
 const sportSel=document.getElementById("sport");
 const eventSel=document.getElementById("event");
-sports.forEach(x=>{if(x) sportSel.insertAdjacentHTML("beforeend",`<option>${x}</option>`)});
+
 events.forEach(x=>{if(x) eventSel.insertAdjacentHTML("beforeend",`<option>${x}</option>`)});
 
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -118,7 +118,7 @@ function render(){
   renderTabs();
   const q=document.getElementById("search").value.trim().toLowerCase();
   const sp=sportSel.value, ev=eventSel.value;
-  let rows=data.filter(r=>r.date===activeDate && (!sp||r.sport===sp) && (!ev||r.event===ev));
+  let rows=data.filter(r=>r.date===activeDate && (!sp || (sp==="羽球籃球" ? (r.sport==="羽球" || r.sport==="籃球") : r.sport===sp)) && (!ev||r.event===ev));
   if(q) rows=rows.filter(r=>Object.values(r).join(" ").toLowerCase().includes(q));
   rows.sort((a,b)=>a.time.localeCompare(b.time));
   const sec=document.getElementById("schedule");
