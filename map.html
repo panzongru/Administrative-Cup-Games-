@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>115 行政盃｜台中場地地圖</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--ink:#252a31;--muted:#707780;--paper:#fff;--bg:#eef0f3;--line:#e4e6e9}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
+#map{position:fixed;inset:0}
+.top{position:fixed;z-index:1000;left:20px;top:18px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border:1px solid #fff;border-radius:18px;padding:15px 18px;box-shadow:0 8px 30px #1d26301c}
+.kicker{font-size:11px;letter-spacing:.16em;color:#8a6b3d;font-weight:800}.title{font-size:21px;font-weight:850;margin-top:3px}.desc{font-size:12px;color:var(--muted);margin-top:3px}
+.card{position:fixed;z-index:1000;right:18px;top:18px;width:350px;max-height:calc(100vh - 36px);background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-radius:20px;box-shadow:0 12px 40px #1d26301e;overflow:hidden;border:1px solid #fff}
+.head{padding:16px 18px 12px;border-bottom:1px solid var(--line)}.headrow{display:flex;justify-content:space-between;align-items:center}.head h2{font-size:16px;margin:0}.reset{border:0;background:#f1f2f4;border-radius:9px;padding:7px 10px;font-size:12px;cursor:pointer}
+.tabs{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);overflow:auto}.tab{border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 10px;font-size:12px;white-space:nowrap;cursor:pointer}.tab.active{background:#252a31;color:#fff;border-color:#252a31}
+.list{display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;gap:5px;padding:8px 14px;height:330px;scrollbar-width:thin}.item{min-height:0;height:auto;display:flex;gap:10px;align-items:center;padding:7px 9px;border:1px solid #eef0f2;border-radius:13px;background:#fff;scroll-snap-align:start;cursor:pointer;box-shadow:0 2px 7px #1d263008}.item:hover{background:#f7f8f9}.item>div{min-width:0;flex:1}.item a{margin-left:auto;display:grid!important}.item b{font-size:12px;line-height:1.15;display:block;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.item small{font-size:10px;line-height:1.1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.num{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;flex:none}.item b{font-size:13px}.item small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.4}
+.routebox{display:none;padding:9px 12px;background:rgba(255,255,255,.78);backdrop-filter:blur(8px);position:absolute;z-index:1002;width:230px;border-radius:12px;box-shadow:0 5px 18px #1d26301c;border:1px solid rgba(255,255,255,.9);pointer-events:none;border-top:1px solid #eee2d0}.routebox.show{display:block}.routehead{font-size:11px;color:#7b684e;font-weight:750;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.route-main{font-size:16px;font-weight:850}.route-sub{font-size:11px;color:var(--muted);margin-top:3px}.modes{display:flex;gap:5px;margin-top:6px}.mode{background:rgba(255,255,255,.75);border:1px solid #e5e1da;border-radius:8px;padding:5px 7px;font-size:11px;flex:1}.mode strong{display:block;font-size:13px;margin-top:1px}
+.tip{position:fixed;z-index:999;left:20px;bottom:20px;background:rgba(37,42,49,.92);color:#fff;border-radius:12px;padding:9px 13px;font-size:12px;box-shadow:0 5px 20px #0002}
+@media(max-width:800px){
+      .top{left:10px;right:10px;top:10px;padding:12px 14px}
+      .title{font-size:18px}
+      .card{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:46vh;border-radius:18px}
+      .head{padding:12px 14px 8px}
+      .list{height:235px;max-height:235px;padding:7px 10px 10px}
+      .item{padding:6px 8px}
+      .tip{display:none}
+      .routebox{width:210px}
+    }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="top"><div class="kicker">115 行政盃 · TAICHUNG</div><div class="title">比賽・住宿・晚餐地圖</div><div class="desc">選兩個地點，即可查看兩地交通</div></div>
+
+<div class="card">
+  <div class="head"><div class="headrow"><h2>📍 行程地點</h2><button class="reset" onclick="resetRoute()">清除選取</button></div></div>
+  <div id="list" class="list"></div>
+  <div id="routebox" class="routebox"></div>
+</div>
+<div class="tip">① 選起點　② 選終點　→　顯示路線　｜　再點第三個 → 重新選起點</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const places=[{id:"hotel",cat:"住宿",icon:"🏨",name:"塔木德酒店Choice 台中一中館",sub:"🏨 太平路22號｜一中商圈",lat:24.147801,lng:120.68534,color:"#b27a2f"},
+{id:"ntus",cat:"比賽",icon:"🏓",name:"國立臺灣體育運動大學",sub:"🏓 桌球｜雙十路一段16號",lat:24.14870915,lng:120.6876707,color:"#7156a8"},
+{id:"sports",cat:"比賽",icon:"🏸",name:"臺中市北區國民運動中心",sub:"🏸🏀 羽球、籃球｜崇德路一段55號",lat:24.1570556,lng:120.6841111,color:"#23836d"},
+{id:"yizhong",cat:"景點",icon:"🛍️",name:"一中街",sub:"🛍️ 一中商圈",lat:24.15025,lng:120.68565,color:"#555b63"},
+{id:"lion",cat:"餐飲",icon:"🍺",name:"獅兄弟酒館",sub:"🍺 9/10（四）17:30 晚餐｜柳川西路二段150號",lat:24.14645,lng:120.67265,color:"#b45757"},
+{id:"steak",cat:"餐飲",icon:"🥩",name:"烘牛炭燒大牛排",sub:"🥩 9/11（五）17:30 晚餐｜中華路一段41號",lat:24.14385,lng:120.67515,color:"#a45f35"},
+{id:"haoyun",cat:"活動",icon:"🎉",name:"好運來洲際宴展中心",sub:"🎉 9/12（六）開幕典禮暨選手之夜｜崇德路三段833號",lat:24.199694,lng:120.683999,color:"#3475a8"}];
+
+const map=L.map("map",{zoomControl:false}).setView([24.161,120.681],13);
+L.control.zoom({position:"bottomright"}).addTo(map);
+L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:20,attribution:"© OpenStreetMap © CARTO"}).addTo(map);
+
+const markers={};let chosen=[],routeLayer=null,routeInfoMarker=null;
+places.forEach((p,i)=>{
+ const icon=L.divIcon({className:"",html:`<div style="width:34px;height:34px;border-radius:12px;background:${p.color};border:3px solid white;box-shadow:0 4px 12px #0004;display:grid;place-items:center;color:white;font-weight:850;font-size:12px">${p.icon}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
+ const g=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name+" 台中 "+p.lat+","+p.lng)}`;
+ const m=L.marker([p.lat,p.lng],{icon}).addTo(map).bindPopup(`<b>${p.name}</b><br><span style="color:#777;font-size:12px">${p.sub}</span><br><a href="${g}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;padding:6px 9px;background:#f1f2f4;border-radius:8px;color:#333;text-decoration:none;font-size:12px">📍 在 Google Maps 開啟</a>`);
+ m.on("click",()=>choose(p.id));markers[p.id]=m;
+});
+
+function render(cat="全部"){
+ const list=document.getElementById("list");list.innerHTML="";
+ places.filter(p=>cat==="全部" || p.cat===cat).forEach((p)=>{
+  const i=places.indexOf(p);
+  const g=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name+" 台中 "+p.lat+","+p.lng)}`;
+  list.innerHTML+=`<div class="item" onclick="choose('${p.id}')"><span class="num" style="background:${p.color};font-size:17px">${p.icon}</span><div style="min-width:0;flex:1"><b>${p.name}</b><small>${p.sub}</small></div><a href="${g}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="在 Google Maps 開啟" style="width:30px;height:30px;flex:none;display:grid;place-items:center;background:#f1f2f4;border-radius:9px;text-decoration:none;font-size:15px">📍</a></div>`;
+ });
+}
+render();
+
+function filter(cat,el){render("全部")}
+function choose(id){
+ if(chosen.includes(id)) return;
+ if(chosen.length===2){
+   chosen=[id];
+   if(routeLayer) map.removeLayer(routeLayer);
+   routeLayer=null;
+   document.getElementById("routebox").classList.remove("show");
+   markers[id].openPopup();
+   map.panTo(markers[id].getLatLng(),{animate:true});
+   return;
+ }
+ chosen.push(id);
+ markers[id].openPopup();
+ if(chosen.length===2) drawRoute();
+}
+async function drawRoute(){
+ const A=places.find(p=>p.id===chosen[0]),B=places.find(p=>p.id===chosen[1]);
+ const url=`https://router.project-osrm.org/route/v1/driving/${A.lng},${A.lat};${B.lng},${B.lat}?overview=full&geometries=geojson`;
+ try{
+  const data=await fetch(url).then(r=>r.json());const r=data.routes[0];
+  if(routeLayer)map.removeLayer(routeLayer);
+  if(routeInfoMarker)map.removeLayer(routeInfoMarker);
+  routeLayer=L.geoJSON(r.geometry,{style:{weight:6,opacity:.9}}).addTo(map);
+  map.fitBounds(routeLayer.getBounds(),{padding:[80,80]});
+  const km=r.distance/1000, car=Math.max(1,Math.round(r.duration/60)), walk=Math.max(1,Math.round(km/4.5*60));
+  const primary=walk<=10?`🚶 步行約 ${walk} 分鐘`:`🚗 開車約 ${car} 分鐘`;
+  const box=document.createElement("div");
+  box.className="routebox";
+  box.style.display="block";
+  box.innerHTML=`<div class="routehead">${A.name} → ${B.name}</div><div class="route-main">${primary}</div><div class="route-sub">距離約 ${km.toFixed(1)} 公里</div><div class="modes"><div class="mode">🚗 開車<strong>${car} 分鐘</strong></div><div class="mode">🚶 步行<strong>${walk} 分鐘</strong></div></div>`;
+  routeInfoMarker=L.marker([(A.lat+B.lat)/2,(A.lng+B.lng)/2],{
+    icon:L.divIcon({className:"route-info-icon",html:box.outerHTML,iconSize:[230,92],iconAnchor:[-10,46]})
+  }).addTo(map);
+ }catch(e){
+  const box=document.getElementById("routebox");
+  box.innerHTML="目前無法取得路線，請稍後再試。";box.classList.add("show");
+ }
+}
+function resetRoute(){chosen=[];if(routeLayer)map.removeLayer(routeLayer);if(routeInfoMarker)map.removeLayer(routeInfoMarker);routeLayer=null;routeInfoMarker=null;document.getElementById("routebox").classList.remove("show")}
+</script>
+</body>
+</html>
