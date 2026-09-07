@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>115年行政盃｜台中地圖</title>
+<title>115年全國原住民族行政盃｜台中地圖</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 *{box-sizing:border-box}
@@ -50,7 +50,7 @@ html,body{margin:0;width:100%;height:100%;font-family:-apple-system,BlinkMacSyst
 <body>
 <nav class="page-tabs"><a href="index.html">🏆 賽程</a><a href="map.html" class="active">🗺️ 台中地圖</a></nav>
 <div id="map"></div>
-<div class="top"><div class="kicker">ADMINISTRATIVE CUP</div><div class="title">115年行程盃｜台中行程地圖</div><div class="desc">📍 定位自己・選擇行程地點・可用 Google Maps 導航</div></div>
+<div class="top"><div class="kicker">ADMINISTRATIVE CUP</div><div class="title">行政盃｜台中行程地圖</div><div class="desc">📍 定位自己・選擇行程地點・可用 Google Maps 導航</div></div>
 <div class="card">
  <div class="head"><div class="headrow"><h2>📍 行程地點</h2><div><button class="locate-btn" onclick="locateMe()">📍 我的位置</button><button class="reset" onclick="resetMap()">全圖</button></div></div></div>
  <div id="list" class="list"></div>
@@ -70,13 +70,13 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r
 const markers={}, user={marker:null,circle:null};
 places.forEach(p=>{
  const icon=L.divIcon({className:'',html:`<div style="width:34px;height:34px;border-radius:12px;background:${p.color};border:3px solid white;box-shadow:0 4px 12px #0004;display:grid;place-items:center;font-size:16px">${p.icon}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
- const nav=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
+ const nav=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.name+" 台中")}`;
  const m=L.marker([p.lat,p.lng],{icon}).addTo(map).bindPopup(`<b>${p.name}</b><br><span style="font-size:12px;color:#777">${p.sub}</span><br><a href="${nav}" target="_blank" rel="noopener" style="display:inline-block;margin-top:7px;padding:6px 9px;background:#252a31;color:#fff;text-decoration:none;border-radius:8px;font-size:11px">🧭 Google Maps 導航</a>`);
  m.on('click',()=>focusPlace(p.id)); markers[p.id]=m;
 });
 function render(){
  document.getElementById('list').innerHTML=places.map(p=>{
-  const nav=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
+  const nav=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.name+" 台中")}`;
   return `<div class="item" data-place-id="${p.id}" onclick="focusPlace('${p.id}')"><span class="num" style="background:${p.color}">${p.icon}</span><div><b>${p.name}</b><small>${p.sub}</small></div><a class="nav" href="${nav}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🧭</a></div>`;
  }).join('');
 }
