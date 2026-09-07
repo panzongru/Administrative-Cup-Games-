@@ -127,7 +127,7 @@ function render(){
   rows.forEach(r=>(groups[r.time]??=[]).push(r));
   sec.innerHTML=`<div class="day-title"><h2>${esc(activeDate)}</h2><small>依時間排序</small></div>
     ${Object.entries(groups).map(([time,arr])=>`<div class="day"><div class="grid">${arr.map(r=>`
-      <article class="card ${r.sport==="桌球"?"sport-table-tennis":r.sport==="羽球"?"sport-badminton":r.sport==="籃球"?"sport-basketball":r.sport==="足球"?"sport-football":"sport-default"} ${String(r.match||"").includes("牡丹鄉民代表會""代表會團體組")?"mudan-card":""}">
+      <article class="card ${r.sport==="桌球"?"sport-table-tennis":r.sport==="羽球"?"sport-badminton":r.sport==="籃球"?"sport-basketball":r.sport==="足球"?"sport-football":"sport-default"} ${String(r.match||"").includes("牡丹鄉民代表會")?"mudan-card":""}">
         <div class="top"><div class="time">${esc(r.time)}</div><div class="badge">${esc(r.sport)}</div></div>
         <div class="meta"><span>${esc(r.event)}</span>${r.group?`<span>分組 ${esc(r.group)}</span>`:''}${r.match_no?`<span>場次 ${esc(String(r.match_no).trim().replace(/\.0+$/, ''))}</span>`:''}</div>
         <div class="match">${splitMatch(r.match)}</div>
