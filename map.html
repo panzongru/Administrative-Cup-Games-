@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>115 行政盃｜台中場地地圖</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
@@ -18,19 +18,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","
 .list{display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;gap:5px;padding:8px 14px;height:330px;scrollbar-width:thin}.item{min-height:0;height:auto;display:flex;gap:10px;align-items:center;padding:7px 9px;border:1px solid #eef0f2;border-radius:13px;background:#fff;scroll-snap-align:start;cursor:pointer;box-shadow:0 2px 7px #1d263008}.item:hover{background:#f7f8f9}.item>div{min-width:0;flex:1}.item a{margin-left:auto;display:grid!important}.item b{font-size:12px;line-height:1.15;display:block;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.item small{font-size:10px;line-height:1.1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.num{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;flex:none}.item b{font-size:13px}.item small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.4}
 .routebox{display:none;padding:9px 12px;background:rgba(255,255,255,.78);backdrop-filter:blur(8px);position:absolute;z-index:1002;width:230px;border-radius:12px;box-shadow:0 5px 18px #1d26301c;border:1px solid rgba(255,255,255,.9);pointer-events:none;border-top:1px solid #eee2d0}.routebox.show{display:block}.routehead{font-size:11px;color:#7b684e;font-weight:750;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.route-main{font-size:16px;font-weight:850}.route-sub{font-size:11px;color:var(--muted);margin-top:3px}.modes{display:flex;gap:5px;margin-top:6px}.mode{background:rgba(255,255,255,.75);border:1px solid #e5e1da;border-radius:8px;padding:5px 7px;font-size:11px;flex:1}.mode strong{display:block;font-size:13px;margin-top:1px}
 .tip{position:fixed;z-index:999;left:20px;bottom:20px;background:rgba(37,42,49,.92);color:#fff;border-radius:12px;padding:9px 13px;font-size:12px;box-shadow:0 5px 20px #0002}
-@media(max-width:800px){
-      .top{left:10px;right:10px;top:10px;padding:12px 14px}
-      .title{font-size:18px}
-      .card{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:46vh;border-radius:18px}
-      .head{padding:12px 14px 8px}
-      .list{height:235px;max-height:235px;padding:7px 10px 10px}
-      .item{padding:6px 8px}
-      .tip{display:none}
-      .routebox{width:210px}
-    }
+@media(max-width:800px){.top{left:10px;right:10px;top:10px}.card{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:52vh}.list{height:300px;max-height:300px}.tip{display:none}.routebox{width:230px}}
 </style>
 </head>
 <body>
+<style>
+.site-nav{position:fixed;z-index:3000;top:14px;right:16px;display:flex;gap:6px;padding:5px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border:1px solid rgba(0,0,0,.06);border-radius:12px;box-shadow:0 5px 18px rgba(20,30,40,.10)}
+.site-nav a{display:block;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:800;color:#59616a}
+.site-nav a.active{background:#252a31;color:#fff}
+@media(max-width:700px){.site-nav{top:8px;right:8px}.site-nav a{padding:7px 10px;font-size:12px}}
+</style>
+
+<nav class="site-nav" aria-label="網站分頁">
+<a href="index.html">🏆 賽程</a>
+<a class="active" href="map.html">🗺️ 台中地圖</a>
+</nav>
+
 <div id="map"></div>
 <div class="top"><div class="kicker">115 行政盃 · TAICHUNG</div><div class="title">比賽・住宿・晚餐地圖</div><div class="desc">選兩個地點，即可查看兩地交通</div></div>
 
