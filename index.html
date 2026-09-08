@@ -34,9 +34,9 @@ input:focus,select:focus{border-color:#b38b66;box-shadow:0 0 0 3px #efe5da}
 .day-title small{color:var(--muted)} 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
 
-.sport-table-tennis{--sport:#b06b4f;--sport-bg:#f5e3dc}
+.sport-table-tennis{--sport:#3f6f9f;--sport-bg:#e3edf7}
 .sport-badminton{--sport:#4d7c66;--sport-bg:#e2eee8}
-.sport-basketball{--sport:#b47a2c;--sport-bg:#f4e9d5}
+.sport-basketball{--sport:#d45f32;--sport-bg:#f8e3da}
 .sport-football{--sport:#5d6fa8;--sport-bg:#e5e9f5}
 .sport-default{--sport:#7a657f;--sport-bg:#eee8ef}
 .card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:16px;box-shadow:0 5px 18px rgba(20,30,40,.04);position:relative;overflow:hidden}
@@ -47,7 +47,7 @@ input:focus,select:focus{border-color:#b38b66;box-shadow:0 0 0 3px #efe5da}
 .meta{display:flex;gap:6px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-bottom:12px}
 .meta span{background:#f3f4f6;border-radius:7px;padding:5px 8px}
 .match{font-size:16px;line-height:1.65;font-weight:600}
-.vs{color:var(--accent);font-weight:800;margin:0 5px}
+.vs{color:var(--sport,var(--accent));font-weight:800;margin:0 5px}
 .empty{padding:60px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #d7dce1;border-radius:18px}
 footer{text-align:center;color:#9aa1a8;font-size:12px;padding:0 20px 35px}
 @media(max-width:760px){.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr}header{padding-top:30px}.container{padding:0 12px}}
@@ -108,8 +108,9 @@ events.forEach(x=>{if(x) eventSel.insertAdjacentHTML("beforeend",`<option>${x}</
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function markMudan(s){ return esc(s); }
 function splitMatch(s){
-  let p=s.split(/\s+vs\s+/i);
-  return p.length===2 ? `${markMudan(p[0])} <span class="vs">VS</span> ${markMudan(p[1])}` : markMudan(s);
+  // 統一處理 vs / VS，以及前後有無空格的寫法
+  let p=String(s).split(/\s*vs\s*/i);
+  return p.length===2 ? `${markMudan(p[0].trim())} <span class="vs">VS</span> ${markMudan(p[1].trim())}` : markMudan(s);
 }
 function renderTabs(){
   document.getElementById("dateTabs").innerHTML=dates.map(d=>`<button class="tab ${d===activeDate?'active':''}" onclick="activeDate='${d.replace(/'/g,"\\'")}';render()">${esc(d)}</button>`).join("");
